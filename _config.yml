@@ -7,8 +7,8 @@ title: Hexo
 subtitle: ''
 description: ''
 keywords:
-author: John Doe
-language: en
+author: ÑôÒ»Ãù
+language: zh-Hans
 timezone: ''
 
 # URL
@@ -93,7 +93,7 @@ ignore:
 # Extensions
 ## Plugins: https://hexo.io/plugins/
 ## Themes: https://hexo.io/themes/
-theme: landscape
+theme: aomori
 
 # Deployment
 ## Docs: https://hexo.io/docs/deployment.html
