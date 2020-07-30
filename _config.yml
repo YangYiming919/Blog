@@ -1,15 +1,15 @@
-# Hexo Configuration
+﻿# Hexo Configuration
 ## Docs: https://hexo.io/docs/configuration.html
 ## Source: https://github.com/hexojs/hexo/
 
 # Site
-title: ????
+title: black hole
 subtitle: "share acknowledge"
-description: "???????"
+description: "自主动手，拒绝学术垃圾"
 keywords:
 author: YangYiming
 language: zh-Hans
-timezone: ""
+timezone: "Asia/Shanghai"
 
 # URL
 ## If your site is put in a subdirectory, set url as 'http://yoursite.com/child' and root as '/child/'
