@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  
+  <meta name="description" content="高性能固态盘的多级并行性及算法研究—胡洋
+针对该论文的学习总结
+
+第三节—固态盘的闪存转换层地址映射方法常见的映射算法
+页级映射：一一映射，占用空间大。
+块级映射存在的问题是，需要频繁的擦写将导致读写性能下降，同时影响寿命。
+混合映射：同时采用块级映射和页级映射。采用页级映射的物理块称之为日志块，采" />
+  
+
+  
+  
+  
+  
+  
+  
+  <title>第三节---固态盘的闪存转换层 | Hexo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="高性能固态盘的多级并行性及算法研究—胡洋 针对该论文的学习总结  第三节—固态盘的闪存转换层地址映射方法常见的映射算法 页级映射：一一映射，占用空间大。 块级映射存在的问题是，需要频繁的擦写将导致读写性能下降，同时影响寿命。 混合映射：同时采用块级映射和页级映射。采用页级映射的物理块称之为日志块，采用块级映射的物理块称之为数据块。易知，日志快用来存储热数据；数据块用来存取冷数据。当日志块不够使用">
+<meta property="og:type" content="article">
+<meta property="og:title" content="第三节---固态盘的闪存转换层">
+<meta property="og:url" content="http://yoursite.com/2020/07/29/%E7%AC%AC%E4%B8%89%E8%8A%82---%E5%9B%BA%E6%80%81%E7%9B%98%E7%9A%84%E9%97%AA%E5%AD%98%E8%BD%AC%E6%8D%A2%E5%B1%82/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="高性能固态盘的多级并行性及算法研究—胡洋 针对该论文的学习总结  第三节—固态盘的闪存转换层地址映射方法常见的映射算法 页级映射：一一映射，占用空间大。 块级映射存在的问题是，需要频繁的擦写将导致读写性能下降，同时影响寿命。 混合映射：同时采用块级映射和页级映射。采用页级映射的物理块称之为日志块，采用块级映射的物理块称之为数据块。易知，日志快用来存储热数据；数据块用来存取冷数据。当日志块不够使用">
+<meta property="og:image" content="http://yoursite.com/2020/07/29/%E7%AC%AC%E4%B8%89%E8%8A%82---%E5%9B%BA%E6%80%81%E7%9B%98%E7%9A%84%E9%97%AA%E5%AD%98%E8%BD%AC%E6%8D%A2%E5%B1%82/.%5Ctypora-user-images%5Cimage-20200728112733090.png">
+<meta property="og:image" content="http://yoursite.com/2020/07/29/%E7%AC%AC%E4%B8%89%E8%8A%82---%E5%9B%BA%E6%80%81%E7%9B%98%E7%9A%84%E9%97%AA%E5%AD%98%E8%BD%AC%E6%8D%A2%E5%B1%82/.%5Ctypora-user-images%5Cimage-20200728150016691.png">
+<meta property="og:image" content="http://yoursite.com/2020/07/29/%E7%AC%AC%E4%B8%89%E8%8A%82---%E5%9B%BA%E6%80%81%E7%9B%98%E7%9A%84%E9%97%AA%E5%AD%98%E8%BD%AC%E6%8D%A2%E5%B1%82/.%5Ctypora-user-images%5Cimage-20200728153338434.png">
+<meta property="og:image" content="http://yoursite.com/2020/07/29/%E7%AC%AC%E4%B8%89%E8%8A%82---%E5%9B%BA%E6%80%81%E7%9B%98%E7%9A%84%E9%97%AA%E5%AD%98%E8%BD%AC%E6%8D%A2%E5%B1%82/.%5Ctypora-user-images%5Cimage-20200728153640941.png">
+<meta property="og:image" content="http://yoursite.com/2020/07/29/%E7%AC%AC%E4%B8%89%E8%8A%82---%E5%9B%BA%E6%80%81%E7%9B%98%E7%9A%84%E9%97%AA%E5%AD%98%E8%BD%AC%E6%8D%A2%E5%B1%82/.%5Ctypora-user-images%5Cimage-20200728153848963.png">
+<meta property="article:published_time" content="2020-07-28T16:51:01.023Z">
+<meta property="article:modified_time" content="2020-07-29T02:50:47.262Z">
+<meta property="article:author" content="��һ��">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://yoursite.com/2020/07/29/%E7%AC%AC%E4%B8%89%E8%8A%82---%E5%9B%BA%E6%80%81%E7%9B%98%E7%9A%84%E9%97%AA%E5%AD%98%E8%BD%AC%E6%8D%A2%E5%B1%82/.%5Ctypora-user-images%5Cimage-20200728112733090.png">
+  
+  
+    <link rel="icon" href="/css/images/favicon.ico">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+
+  
+  <!-- baidu webmaster push -->
+  <script src='//push.zhanzhang.baidu.com/push.js'></script>
+<meta name="generator" content="Hexo 4.2.1"></head>
+<body class="home blog custom-background custom-font-enabled single-author">
+  <div id="page" class="hfeed site">
+      <header id="masthead" class="site-header" role="banner">
+    <hgroup>
+      <h1 class="site-title">
+        <a href="/" title="Hexo" rel="home">Hexo</a>
+      </h1>
+      
+        <h2 class="site-description hitokoto"></h2>
+        <script type="text/javascript" src="https://v1.hitokoto.cn/?encode=js"></script>
+      
+    </hgroup>
+
+    <nav id="site-navigation" class="main-navigation" role="navigation">
+            <button class="menu-toggle">菜单</button>
+            <a class="assistive-text" href="/#content" title="跳至内容">跳至内容</a><!--TODO-->
+            <div class="menu-main-container">
+                <ul id="menu-main" class="nav-menu">
+                
+                    <li class="menu-item menu-item-type-post_type menu-item-object-page"><a href="/">Home</a></li>
+                
+                    <li class="menu-item menu-item-type-post_type menu-item-object-page"><a href="/archives">Archives</a></li>
+                
+                </ul>
+            </div>
+    </nav>
+</header>
+
+      <div id="main" class="wrapper">
+        <div id="primary" class="site-content"><div id="content" role="main"><article id="post-第三节---固态盘的闪存转换层" class="post-第三节---固态盘的闪存转换层 post type-post status-publish format-standard hentry">
+    <!---->
+
+      <header class="entry-header">
+        
+        
+  
+    <h1 class="entry-title article-title">
+      第三节---固态盘的闪存转换层
+    </h1>
+  
+
+        
+        <div class="comments-link">
+            
+            <a href="javascript:void(0);" data-url="http://yoursite.com/2020/07/29/%E7%AC%AC%E4%B8%89%E8%8A%82---%E5%9B%BA%E6%80%81%E7%9B%98%E7%9A%84%E9%97%AA%E5%AD%98%E8%BD%AC%E6%8D%A2%E5%B1%82/" data-id="ckd8rpr9p0001qov738lldlt7" class="leave-reply bdsharebuttonbox" data-cmd="more">Share</a>
+        </div><!-- .comments-link -->
+      </header><!-- .entry-header -->
+
+    <div class="entry-content">
+      
+        <blockquote>
+<p>高性能固态盘的多级并行性及算法研究—胡洋</p>
+<p>针对该论文的学习总结</p>
+</blockquote>
+<h1 id="第三节—固态盘的闪存转换层"><a href="#第三节—固态盘的闪存转换层" class="headerlink" title="第三节—固态盘的闪存转换层"></a>第三节—固态盘的闪存转换层</h1><h3 id="地址映射方法"><a href="#地址映射方法" class="headerlink" title="地址映射方法"></a>地址映射方法</h3><h4 id="常见的映射算法"><a href="#常见的映射算法" class="headerlink" title="常见的映射算法"></a>常见的映射算法</h4><ol>
+<li>页级映射：一一映射，占用空间大。<img src=".%5Ctypora-user-images%5Cimage-20200728112733090.png" alt="image-20200728112733090"></li>
+<li>块级映射<img src=".%5Ctypora-user-images%5Cimage-20200728150016691.png" alt="image-20200728150016691">存在的问题是，需要频繁的擦写将导致读写性能下降，同时影响寿命。</li>
+<li>混合映射：同时采用块级映射和页级映射。采用页级映射的物理块称之为日志块，采用块级映射的物理块称之为数据块。易知，日志快用来存储热数据；数据块用来存取冷数据。当日志块不够使用（或者过多时）会发生合并操作，可分为三种<ul>
+<li>全合并<img src=".%5Ctypora-user-images%5Cimage-20200728153338434.png" alt="image-20200728153338434">需要N次读操作，N次写操作，2次擦除操作，严重影响固态盘性能。</li>
+<li>转换合并<img src=".%5Ctypora-user-images%5Cimage-20200728153640941.png" alt="image-20200728153640941">当日志块中的所有数据按照块内偏移存放，可以直接替代数据块，只需要将原有的数据块擦除即可。</li>
+<li>部分合并<img src=".%5Ctypora-user-images%5Cimage-20200728153848963.png" alt="image-20200728153848963">块内已保存的逻辑页是按照块内偏移存放的，只需要将预下的数据写入日志块即可，再将数据块擦除。</li>
+<li>综上，为了保证性能应尽可能的少使用全合并操作。</li>
+</ul>
+</li>
+<li>DFTL：将具有时间局部性或（与）空间局部性的映射关系保存在内存中，当读写所需的映射可以在内存中检索到时，速度等同于页级映射。但当无法在内存中检索到相关数据时，需要多花费从闪存读取的时间。对于具有良好局部性的服务器DFTL性能损失不大，否则反之。</li>
+</ol>
+<h4 id="三层页映射算法"><a href="#三层页映射算法" class="headerlink" title="三层页映射算法"></a>三层页映射算法</h4><h4 id="隐藏翻译过程映射算法"><a href="#隐藏翻译过程映射算法" class="headerlink" title="隐藏翻译过程映射算法"></a>隐藏翻译过程映射算法</h4><h3 id="垃圾回收算法"><a href="#垃圾回收算法" class="headerlink" title="垃圾回收算法"></a>垃圾回收算法</h3><h3 id="损耗均衡算法"><a href="#损耗均衡算法" class="headerlink" title="损耗均衡算法"></a>损耗均衡算法</h3>
+      
+    </div><!-- .entry-content -->
+
+    <footer class="entry-meta">
+    <a href="/2020/07/29/%E7%AC%AC%E4%B8%89%E8%8A%82---%E5%9B%BA%E6%80%81%E7%9B%98%E7%9A%84%E9%97%AA%E5%AD%98%E8%BD%AC%E6%8D%A2%E5%B1%82/">
+    <time datetime="2020-07-28T16:51:01.023Z" class="entry-date">
+        2020-07-29
+    </time>
+</a>
+    
+    
+    </footer>
+</article>
+
+
+    
+<nav class="nav-single">
+    <h3 class="assistive-text">文章导航</h3>
+    
+        <span class="nav-previous"><a href="/2020/07/29/%E9%97%AA%E5%AD%98%E5%AD%98%E5%82%A8%E7%9A%84%E9%87%8D%E6%9E%84%E4%B8%8E%E7%B3%BB%E7%BB%9F%E6%9E%84%E5%BB%BA%E6%8A%80%E6%9C%AF/" rel="prev"><span class="meta-nav">←</span> 闪存存储的重构与系统构建技术</a></span>
+    
+    
+        <span class="nav-next"><a href="/2020/07/29/hello-world/" rel="next">Hello World <span class="meta-nav">→</span></a></span>
+    
+</nav><!-- .nav-single -->
+
+
+
+
+
+
+
+</div></div>
+        <div id="secondary" class="widget-area" role="complementary">
+  
+    <aside id="search" class="widget widget_search"><form role="search" method="get" accept-charset="utf-8" id="searchform" class="searchform" action="//google.com/search">
+    <div>
+        <input type="text" value="" name="s" id="s" />
+        <input type="submit" id="searchsubmit" value="搜索" />
+    </div>
+</form></aside>
+  
+    
+  
+    
+  
+    
+  <aside class="widget">
+    <h3 class="widget-title">Recents</h3>
+    <div class="widget-content">
+      <ul>
+        
+          <li>
+            <a href="/2020/07/29/%E9%9B%85%E6%80%9D%E9%98%85%E8%AF%BB/">雅思阅读</a>
+          </li>
+        
+          <li>
+            <a href="/2020/07/29/%E9%97%AA%E5%AD%98%E5%AD%98%E5%82%A8%E7%9A%84%E9%87%8D%E6%9E%84%E4%B8%8E%E7%B3%BB%E7%BB%9F%E6%9E%84%E5%BB%BA%E6%8A%80%E6%9C%AF/">闪存存储的重构与系统构建技术</a>
+          </li>
+        
+          <li>
+            <a href="/2020/07/29/%E7%AC%AC%E4%B8%89%E8%8A%82---%E5%9B%BA%E6%80%81%E7%9B%98%E7%9A%84%E9%97%AA%E5%AD%98%E8%BD%AC%E6%8D%A2%E5%B1%82/">第三节---固态盘的闪存转换层</a>
+          </li>
+        
+          <li>
+            <a href="/2020/07/29/hello-world/">Hello World</a>
+          </li>
+        
+      </ul>
+    </div>
+  </aside>
+
+  
+    
+  
+    
+  
+</div>
+      </div>
+      <footer id="colophon" role="contentinfo">
+    <p>&copy; 2020 ��һ��
+    All rights reserved.</p>
+    <p>Powered by <a href="http://hexo.io/" target="_blank">Hexo</a></p>
+</footer>
+    <script>window._bd_share_config={"common":{"bdSnsKey":{},"bdText":"","bdMini":"1","bdMiniList":false,"bdPic":"","bdStyle":"2","bdSize":"16"},"share":{}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='/js/share.js'];</script>
+
+<script src="/js/jquery-3.3.1.min.js"></script>
+
+
+  
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+
+  
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+
+<script src="/js/navigation.js"></script>
+
+<div id="bg"></div>
+
+  </div>
+</body>
+</html>
