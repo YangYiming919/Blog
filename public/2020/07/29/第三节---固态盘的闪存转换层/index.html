@@ -4,13 +4,7 @@
   <meta charset="utf-8">
   
   
-  <meta name="description" content="高性能固态盘的多级并行性及算法研究—胡洋
-针对该论文的学习总结
-
-第三节—固态盘的闪存转换层地址映射方法常见的映射算法
-页级映射：一一映射，占用空间大。
-块级映射存在的问题是，需要频繁的擦写将导致读写性能下降，同时影响寿命。
-混合映射：同时采用块级映射和页级映射。采用页级映射的物理块称之为日志块，采" />
+  <meta name="description" content="???????" />
   
 
   
@@ -19,13 +13,13 @@
   
   
   
-  <title>第三节---固态盘的闪存转换层 | Hexo</title>
+  <title>第三节---固态盘的闪存转换层 | ????</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   <meta name="description" content="高性能固态盘的多级并行性及算法研究—胡洋 针对该论文的学习总结  第三节—固态盘的闪存转换层地址映射方法常见的映射算法 页级映射：一一映射，占用空间大。 块级映射存在的问题是，需要频繁的擦写将导致读写性能下降，同时影响寿命。 混合映射：同时采用块级映射和页级映射。采用页级映射的物理块称之为日志块，采用块级映射的物理块称之为数据块。易知，日志快用来存储热数据；数据块用来存取冷数据。当日志块不够使用">
 <meta property="og:type" content="article">
 <meta property="og:title" content="第三节---固态盘的闪存转换层">
 <meta property="og:url" content="http://yoursite.com/2020/07/29/%E7%AC%AC%E4%B8%89%E8%8A%82---%E5%9B%BA%E6%80%81%E7%9B%98%E7%9A%84%E9%97%AA%E5%AD%98%E8%BD%AC%E6%8D%A2%E5%B1%82/index.html">
-<meta property="og:site_name" content="Hexo">
+<meta property="og:site_name" content="????">
 <meta property="og:description" content="高性能固态盘的多级并行性及算法研究—胡洋 针对该论文的学习总结  第三节—固态盘的闪存转换层地址映射方法常见的映射算法 页级映射：一一映射，占用空间大。 块级映射存在的问题是，需要频繁的擦写将导致读写性能下降，同时影响寿命。 混合映射：同时采用块级映射和页级映射。采用页级映射的物理块称之为日志块，采用块级映射的物理块称之为数据块。易知，日志快用来存储热数据；数据块用来存取冷数据。当日志块不够使用">
 <meta property="og:image" content="http://yoursite.com/2020/07/29/%E7%AC%AC%E4%B8%89%E8%8A%82---%E5%9B%BA%E6%80%81%E7%9B%98%E7%9A%84%E9%97%AA%E5%AD%98%E8%BD%AC%E6%8D%A2%E5%B1%82/.%5Ctypora-user-images%5Cimage-20200728112733090.png">
 <meta property="og:image" content="http://yoursite.com/2020/07/29/%E7%AC%AC%E4%B8%89%E8%8A%82---%E5%9B%BA%E6%80%81%E7%9B%98%E7%9A%84%E9%97%AA%E5%AD%98%E8%BD%AC%E6%8D%A2%E5%B1%82/.%5Ctypora-user-images%5Cimage-20200728150016691.png">
@@ -34,7 +28,7 @@
 <meta property="og:image" content="http://yoursite.com/2020/07/29/%E7%AC%AC%E4%B8%89%E8%8A%82---%E5%9B%BA%E6%80%81%E7%9B%98%E7%9A%84%E9%97%AA%E5%AD%98%E8%BD%AC%E6%8D%A2%E5%B1%82/.%5Ctypora-user-images%5Cimage-20200728153848963.png">
 <meta property="article:published_time" content="2020-07-28T16:51:01.023Z">
 <meta property="article:modified_time" content="2020-07-29T02:50:47.262Z">
-<meta property="article:author" content="��һ��">
+<meta property="article:author" content="YangYiming">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:image" content="http://yoursite.com/2020/07/29/%E7%AC%AC%E4%B8%89%E8%8A%82---%E5%9B%BA%E6%80%81%E7%9B%98%E7%9A%84%E9%97%AA%E5%AD%98%E8%BD%AC%E6%8D%A2%E5%B1%82/.%5Ctypora-user-images%5Cimage-20200728112733090.png">
   
@@ -55,11 +49,12 @@
       <header id="masthead" class="site-header" role="banner">
     <hgroup>
       <h1 class="site-title">
-        <a href="/" title="Hexo" rel="home">Hexo</a>
+        <a href="/" title="????" rel="home">????</a>
       </h1>
       
-        <h2 class="site-description hitokoto"></h2>
-        <script type="text/javascript" src="https://v1.hitokoto.cn/?encode=js"></script>
+        <h2 class="site-description">
+          <a href="/" id="subtitle">share acknowledge</a>
+        </h2>
       
     </hgroup>
 
@@ -94,7 +89,7 @@
         
         <div class="comments-link">
             
-            <a href="javascript:void(0);" data-url="http://yoursite.com/2020/07/29/%E7%AC%AC%E4%B8%89%E8%8A%82---%E5%9B%BA%E6%80%81%E7%9B%98%E7%9A%84%E9%97%AA%E5%AD%98%E8%BD%AC%E6%8D%A2%E5%B1%82/" data-id="ckd8rpr9p0001qov738lldlt7" class="leave-reply bdsharebuttonbox" data-cmd="more">Share</a>
+            <a href="javascript:void(0);" data-url="http://yoursite.com/2020/07/29/%E7%AC%AC%E4%B8%89%E8%8A%82---%E5%9B%BA%E6%80%81%E7%9B%98%E7%9A%84%E9%97%AA%E5%AD%98%E8%BD%AC%E6%8D%A2%E5%B1%82/" data-id="ckd8rt0vt00019cv7d5d3cx0o" class="leave-reply bdsharebuttonbox" data-cmd="more">Share</a>
         </div><!-- .comments-link -->
       </header><!-- .entry-header -->
 
@@ -197,7 +192,7 @@
 </div>
       </div>
       <footer id="colophon" role="contentinfo">
-    <p>&copy; 2020 ��һ��
+    <p>&copy; 2020 YangYiming
     All rights reserved.</p>
     <p>Powered by <a href="http://hexo.io/" target="_blank">Hexo</a></p>
 </footer>
